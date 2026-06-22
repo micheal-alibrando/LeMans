@@ -10,13 +10,16 @@ import {
 } from "firebase/firestore";
 
 export async function createUserProfile(user, username) {
+  const friendCode = user.uid.slice(0, 8).toLowerCase();
+
   await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     email: user.email,
     username: username.toLowerCase().trim(),
     photo: user.photoURL || "",
-    friendCode: user.uid.slice(0, 8),
+    friendCode,
     points: 0,
+    
     wins: 0,
     losses: 0,
     winStreak: 0,

@@ -41,8 +41,16 @@ export default function SignupScreen() {
         setErrors({ email: "Email non valida" });
         break;
 
+      case "auth/operation-not-allowed":
+        setErrors({ general: "Registrazione disabilitata sul server" });
+        break;
+
+      case "auth/network-request-failed":
+        setErrors({ general: "Errore di rete, riprova" });
+        break;
+
       default:
-        setErrors({ general: "Errore imprevisto" });
+        setErrors({ general: e.message || "Errore imprevisto" });
     }
   };
 
@@ -58,11 +66,11 @@ export default function SignupScreen() {
       newErrors.username = "Niente spazi nel username";
 
     if (!email) newErrors.email = "Inserisci l'email";
+    else if (!validateEmail(email)) newErrors.email = "Email non valida";
+
     if (!password) newErrors.password = "Inserisci la password";
-
-    const taken = await isUsernameTaken(cleanUsername);
-
-    if (taken) newErrors.username = "Username già preso";
+    else if (password.length < 6)
+      newErrors.password = "Password almeno 6 caratteri";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -72,6 +80,12 @@ export default function SignupScreen() {
     try {
       setLoading(true);
 
+      const taken = await isUsernameTaken(cleanUsername);
+      if (taken) {
+        setErrors({ username: "Username già preso" });
+        return;
+      }
+
       await signup(email, password, cleanUsername);
 
       setEmail("");
@@ -79,8 +93,9 @@ export default function SignupScreen() {
       setUsername("");
       setErrors({});
 
-      navigation.replace("Users");
+      navigation.replace("Home");
     } catch (e) {
+      console.log("SIGNUP ERROR:", e);
       handleFirebaseError(e);
     } finally {
       setLoading(false);
@@ -106,6 +121,7 @@ export default function SignupScreen() {
             onChangeText={setUsername}
             style={styles.input}
             placeholderTextColor="#aaa"
+            autoCapitalize="none"
           />
           {errors.username && (
             <Text style={styles.error}>{errors.username}</Text>
@@ -120,6 +136,8 @@ export default function SignupScreen() {
             onChangeText={setEmail}
             style={styles.input}
             placeholderTextColor="#aaa"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
           {errors.email && <Text style={styles.error}>{errors.email}</Text>}
         </View>

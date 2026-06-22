@@ -70,7 +70,8 @@ export async function getFriends(uid) {
 }
 
 export async function findUserByCode(code) {
-  const q = query(collection(db, "users"), where("friendCode", "==", code));
+  const normalized = code.toLowerCase().trim();
+  const q = query(collection(db, "users"), where("friendCode", "==", normalized));
 
   const snap = await getDocs(q);
 

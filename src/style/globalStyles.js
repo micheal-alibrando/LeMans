@@ -433,12 +433,31 @@ export const styles = StyleSheet.create({
     marginTop: 10,
   },
   bottoneConfermaDisabilitato: {
-    backgroundColor: "#1a1a22",
+    backgroundColor: "#1f1f26",
   },
   testoBottoneConferma: {
     color: "white",
     fontWeight: "700",
     fontSize: 16,
+  },
+  savedPredictionCard: {
+    backgroundColor: "#20232d",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#34c759",
+  },
+  savedPredictionTitle: {
+    color: "#34c759",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  savedPredictionText: {
+    color: "#ffffff",
+    fontSize: 14,
+    marginBottom: 4,
   },
   googleLogo: {
     width: 40,

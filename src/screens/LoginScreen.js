@@ -43,7 +43,7 @@ export default function LoginScreen({ navigation }) {
       setEmail("");
       setPassword("");
 
-      navigation.replace("Users");
+      navigation.replace("Home");
     } catch (e) {
       console.log("❌ LOGIN ERROR:", e.code);
 

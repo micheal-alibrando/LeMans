@@ -1,19 +1,9 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StatusBar,
-  StyleSheet,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, StatusBar, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import { styles } from "../style/globalStyles";
 
-export default function OnBoardingScreen() {
-  const navigation = useNavigation();
-
+export default function OnBoardingScreen({ onGoToLogin }) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#FF3821" />
@@ -38,7 +28,7 @@ export default function OnBoardingScreen() {
         </View>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Signup")}
+          onPress={onGoToLogin}
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>ENTRA IN GARA ORA!</Text>
