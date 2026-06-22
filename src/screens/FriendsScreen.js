@@ -198,7 +198,7 @@ export default function FriendsScreen({ navigation }) {
         <View style={styles.garaCard}>
           <Text style={styles.garaTitolo}>Invia richiesta</Text>
           <TextInput
-            placeholder="Codice amico"
+            placeholder="inserire nome utente amico"
             placeholderTextColor="#666"
             value={code}
             onChangeText={(t) => {
