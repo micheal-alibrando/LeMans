@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../style/globalStyles";
 import { db, auth } from "../services/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, orderBy, query, collection } from "firebase/firestore";
 
 import {
   sendFriendRequest,
@@ -69,13 +69,16 @@ export default function FriendsScreen({ navigation }) {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userRanks, setUserRanks] = useState({});
 
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState("");
 
   useEffect(() => {
     if (currentUser) {
-      loadData();
+      setLoading(true);
+      loadData().finally(() => setLoading(false));
     }
   }, [currentUser]);
 
@@ -83,6 +86,18 @@ export default function FriendsScreen({ navigation }) {
     await fetchFriends();
     await fetchPendingRequests();
     await fetchSentRequests();
+    await loadRanks();
+  }
+
+  async function loadRanks() {
+    const usersQuery = query(collection(db, "users"), orderBy("points", "desc"));
+    const usersSnap = await getDocs(usersQuery);
+    const usersList = usersSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const ranks = {};
+    usersList.forEach((user, index) => {
+      ranks[user.id] = index + 1;
+    });
+    setUserRanks(ranks);
   }
 
   async function fetchFriends() {
@@ -92,7 +107,7 @@ export default function FriendsScreen({ navigation }) {
     for (const f of data) {
       const userSnap = await getDoc(doc(db, "users", f.uid));
       if (userSnap.exists()) {
-        full.push({ friendshipId: f.id, ...userSnap.data() });
+        full.push({ friendshipId: f.id, uid: f.uid, ...userSnap.data() });
       }
     }
     setFriends(full);
@@ -215,42 +230,80 @@ export default function FriendsScreen({ navigation }) {
           />
         </View>
 
-        <Title>Amici</Title>
-        {friends.map((f) => (
-          <Card key={f.friendshipId}>
-            <Text style={styles.garaTitolo}>{f.username}</Text>
-            <ButtonUI
-              title="Rimuovi amico"
-              danger
-              onPress={async () => {
-                await removeFriend(f.friendshipId);
-                loadData();
-              }}
-            />
+        <Title>Amici ({friends.length})</Title>
+        {friends.length === 0 ? (
+          <Card>
+            <Text style={{ color: "#999", textAlign: "center", paddingVertical: 20 }}>
+              Nessun amico ancora. Invia una richiesta!
+            </Text>
           </Card>
-        ))}
+        ) : (
+          friends.map((f) => (
+            <Card key={f.friendshipId}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.garaTitolo}>{f.username}</Text>
+                  <View style={{ flexDirection: "row", marginTop: 8, gap: 16 }}>
+                    <View>
+                      <Text style={{ color: "#999", fontSize: 12 }}>Punti</Text>
+                      <Text style={{ color: "#34c759", fontWeight: "700", fontSize: 14 }}>{f.points || 0}</Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: "#999", fontSize: 12 }}>Posizione</Text>
+                      <Text style={{ color: "#ffd60a", fontWeight: "700", fontSize: 14 }}>{userRanks[f.uid] || "-"}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <ButtonUI
+                title="Rimuovi amico"
+                danger
+                onPress={async () => {
+                  await removeFriend(f.friendshipId);
+                  await loadData();
+                }}
+              />
+            </Card>
+          ))
+        )}
 
-        <Title>Richieste ricevute</Title>
-        {pendingRequests.map((r) => (
-          <Card key={r.friendshipId}>
-            <Text style={styles.garaTitolo}>{r.username}</Text>
-            <ButtonUI
-              title="Accetta"
-              onPress={async () => {
-                await acceptFriend(r.friendshipId);
-                loadData();
-              }}
-            />
+        <Title>Richieste ricevute ({pendingRequests.length})</Title>
+        {pendingRequests.length === 0 ? (
+          <Card>
+            <Text style={{ color: "#999", textAlign: "center", paddingVertical: 20 }}>
+              Nessuna richiesta in sospeso
+            </Text>
           </Card>
-        ))}
+        ) : (
+          pendingRequests.map((r) => (
+            <Card key={r.friendshipId}>
+              <Text style={styles.garaTitolo}>{r.username}</Text>
+              <ButtonUI
+                title="Accetta"
+                onPress={async () => {
+                  await acceptFriend(r.friendshipId);
+                  await loadData();
+                }}
+              />
+            </Card>
+          ))
+        )}
 
-        <Title>Richieste inviate</Title>
-        {sentRequests.map((r) => (
-          <Card key={r.friendshipId}>
-            <Text style={styles.garaTitolo}>{r.username}</Text>
-            <Text style={{ color: "#888", marginTop: 8 }}>In attesa...</Text>
+        <Title>Richieste inviate ({sentRequests.length})</Title>
+        {sentRequests.length === 0 ? (
+          <Card>
+            <Text style={{ color: "#999", textAlign: "center", paddingVertical: 20 }}>
+              Nessuna richiesta inviata
+            </Text>
           </Card>
-        ))}
+        ) : (
+          sentRequests.map((r) => (
+            <Card key={r.friendshipId}>
+              <Text style={styles.garaTitolo}>{r.username}</Text>
+              <Text style={{ color: "#888", marginTop: 8 }}>⏳ In attesa...</Text>
+            </Card>
+          ))
+        )}
       </ScrollView>
 
       <BottomNav current="Users" onNavigate={(route) => navigation.navigate(route)} />

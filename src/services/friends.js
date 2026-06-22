@@ -71,16 +71,41 @@ export async function getFriends(uid) {
 
 export async function findUserByCode(code) {
   const normalized = code.toLowerCase().trim();
-  const q = query(collection(db, "users"), where("friendCode", "==", normalized));
+  
+  // Prova prima per friendCode
+  let q = query(collection(db, "users"), where("friendCode", "==", normalized));
+  let snap = await getDocs(q);
+  
+  if (!snap.empty) {
+    return {
+      id: snap.docs[0].id,
+      ...snap.docs[0].data(),
+    };
+  }
 
-  const snap = await getDocs(q);
+  // Se non trovi per friendCode, prova per username
+  q = query(collection(db, "users"), where("username", "==", normalized));
+  snap = await getDocs(q);
+  
+  if (!snap.empty) {
+    return {
+      id: snap.docs[0].id,
+      ...snap.docs[0].data(),
+    };
+  }
 
-  if (snap.empty) return null;
+  // Se non trovi per username, prova per email
+  q = query(collection(db, "users"), where("email", "==", normalized));
+  snap = await getDocs(q);
+  
+  if (!snap.empty) {
+    return {
+      id: snap.docs[0].id,
+      ...snap.docs[0].data(),
+    };
+  }
 
-  return {
-    id: snap.docs[0].id,
-    ...snap.docs[0].data(),
-  };
+  return null;
 }
 
 export async function sendFriendRequest(myUid, targetUid) {
