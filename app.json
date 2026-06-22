@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Le Mans",
+    "slug": "snack-8a24d78e-8736-4712-b224-27ffa396f878",
+    "scheme": "lemans",
+    "platforms": ["android", "ios", "web"],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./src/assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.lemans.app"
+    },
+    "plugins": ["expo-web-browser"],
+    "extra": {
+      "eas": {
+        "projectId": "8005e646-ac7c-4f0d-a599-9c55bf0d0f49"
+      }
+    }
+  }
+}
