@@ -23,22 +23,37 @@ import {
   findUserByCode,
 } from "../services/friends";
 
-function BottomNav({ current, navigation }) {
+function BottomNav({ current, onNavigate }) {
   return (
     <View style={styles.bottomNav}>
-      <TouchableOpacity onPress={() => navigation.navigate("Home")}> 
+      <TouchableOpacity onPress={() => onNavigate("Home")}> 
         <Text
           style={
-            current === "Home" ? styles.navLabelActive : styles.navLabel
+            current === "Home"
+              ? styles.navLabelActive
+              : styles.navLabel
           }
         >
           Home
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Users")}> 
+      <TouchableOpacity onPress={() => onNavigate("Leaderboard")}> 
         <Text
           style={
-            current === "Users" ? styles.navLabelActive : styles.navLabel
+            current === "Leaderboard"
+              ? styles.navLabelActive
+              : styles.navLabel
+          }
+        >
+          Classifica
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => onNavigate("Users")}> 
+        <Text
+          style={
+            current === "Users"
+              ? styles.navLabelActive
+              : styles.navLabel
           }
         >
           Amici
@@ -238,7 +253,7 @@ export default function FriendsScreen({ navigation }) {
         ))}
       </ScrollView>
 
-      <BottomNav current="Users" navigation={navigation} />
+      <BottomNav current="Users" onNavigate={(route) => navigation.navigate(route)} />
     </SafeAreaView>
   );
 }

@@ -7,13 +7,15 @@ import {
   ScrollView,
   FlatList,
   Alert,
+  Image,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../style/globalStyles";
 import { auth, db } from "../services/firebase";
 import { loadPrediction, savePrediction } from "../services/predictionService";
 import { PILOTI, GARE } from "../data";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 
 function CountdownTimer({ targetDate, label }) {
   const [remaining, setRemaining] = useState(getRemaining(targetDate));
@@ -69,7 +71,18 @@ function BottomNav({ current, onNavigate }) {
           Home
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onNavigate("Users")}> 
+      <TouchableOpacity onPress={() => onNavigate("Leaderboard")} > 
+        <Text
+          style={
+            current === "Leaderboard"
+              ? styles.navLabelActive
+              : styles.navLabel
+          }
+        >
+          Classifica
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => onNavigate("Users")}  > 
         <Text
           style={
             current === "Users"
@@ -91,13 +104,17 @@ export default function HomeScreen({
   navigation,
 }) {
   const [profileName, setProfileName] = useState(username || "");
+  const [userPhoto, setUserPhoto] = useState(null);
   const [showPrediction, setShowPrediction] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
   const [primo, setPrimo] = useState(null);
   const [secondo, setSecondo] = useState(null);
   const [terzo, setTerzo] = useState(null);
   const [selezioneAttiva, setSelezioneAttiva] = useState(1);
   const [savedPrediction, setSavedPrediction] = useState(null);
   const [nextRace, setNextRace] = useState(null);
+  const [userPoints, setUserPoints] = useState(0);
+  const [userRank, setUserRank] = useState(null);
 
   const handleNavigate = (route) => {
     if (navigation && route) {
@@ -114,12 +131,25 @@ export default function HomeScreen({
       if (userDoc.exists()) {
         const data = userDoc.data();
         setProfileName(data.username || currentUser.email || "Pilota");
+        setUserPhoto(data.photo || null);
+        setUserPoints(data.points || 0);
       }
 
       const prediction = await loadPrediction(currentUser.uid, "24h-le-mans");
       if (prediction) {
         setSavedPrediction(prediction);
       }
+    }
+
+    async function loadUserRank() {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      const usersQuery = query(collection(db, "users"), orderBy("points", "desc"));
+      const usersSnap = await getDocs(usersQuery);
+      const usersList = usersSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const rank = usersList.findIndex((user) => user.id === currentUser.uid) + 1;
+      setUserRank(rank || null);
     }
 
     function findNextRace() {
@@ -133,6 +163,7 @@ export default function HomeScreen({
 
     findNextRace();
     loadUsernameAndPrediction();
+    loadUserRank();
   }, [username]);
 
   const displayName = username || profileName || "Pilota";
@@ -164,16 +195,22 @@ export default function HomeScreen({
     }
 
     try {
-      await savePrediction(
+      const pointsEarned = await savePrediction(
         currentUser.uid,
         "24h-le-mans",
         primo,
         secondo,
         terzo,
+        savedPrediction?.pointsEarned || 0,
       );
 
-      const predictionToSave = { primo, secondo, terzo };
+      const predictionToSave = { primo, secondo, terzo, pointsEarned };
       setSavedPrediction(predictionToSave);
+      setUserPoints((current) => {
+        const diff = pointsEarned - (savedPrediction?.pointsEarned || 0);
+        return current + diff;
+      });
+      loadUserRank();
       Alert.alert("Previsione", "Previsione inviata con successo");
       setShowPrediction(false);
     } catch (error) {
@@ -338,23 +375,92 @@ export default function HomeScreen({
             <Text style={styles.garaBadge}>Nessuna gara programmata</Text>
           )}
         </View>
-        <TouchableOpacity onPress={async () => {
-          try {
-            await auth.signOut();
-          } catch (error) {
-            console.error("Errore logout:", error);
-          }
-          if (navigation && navigation.replace) {
-            navigation.replace("Login");
-          }
-        }}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {displayName ? displayName[0].toUpperCase() : "?"}
-            </Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.avatarContainer}>
+          <TouchableOpacity onPress={() => setShowScoreModal(true)}>
+            <Text style={styles.scoreIcon}>📊</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={async () => {
+            try {
+              await auth.signOut();
+            } catch (error) {
+              console.error("Errore logout:", error);
+            }
+            if (navigation && navigation.replace) {
+              navigation.replace("Login");
+            }
+          }}>
+            <View style={styles.avatar}>
+              {userPhoto ? (
+                <Image source={{ uri: userPhoto }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarText}>
+                  {displayName ? displayName[0].toUpperCase() : "?"}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <Modal
+        visible={showScoreModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowScoreModal(false)}
+      >
+        <View style={styles.scoreModalContainer}>
+          <View style={styles.scoreModalContent}>
+            <TouchableOpacity onPress={() => setShowScoreModal(false)}>
+              <Text style={styles.scoreModalClose}>✕</Text>
+            </TouchableOpacity>
+            <Text style={styles.scoreModalTitle}>Dettaglio Punti</Text>
+            <View style={styles.scoreDetailRow}>
+              <Text style={styles.scoreDetailLabel}>posizione esatta +3 pt</Text>
+             
+            </View>
+            <View style={styles.scoreDetailRow}>
+              <Text style={styles.scoreDetailLabel}>in Top 5 ma posizione errata +1pt</Text>
+              
+            </View>
+            <View style={styles.scoreDetailRow}>
+              <Text style={styles.scoreDetailLabel}>Bonus: posizioni esatte +3pt</Text>
+              
+            </View>
+            {savedPrediction?.pointsEarned ? (
+              <View style={styles.scoreDetailBreakdown}>
+                <Text style={styles.scoreBreakdownLabel}>Breakdown previsione:</Text>
+                {savedPrediction.pointsEarned >= 10 && (
+                  <View style={styles.scoreBreakdownRow}>
+                    <Text style={styles.scoreBreakdownText}>✓ 1° corretto: +</Text>
+                    <View style={styles.pointBadge}>
+                      <Text style={styles.pointBadgeText}>10</Text>
+                    </View>
+                    <Text style={styles.scoreBreakdownText}> pt</Text>
+                  </View>
+                )}
+                {savedPrediction.pointsEarned >= 7 && savedPrediction.pointsEarned < 15 && (
+                  <View style={styles.scoreBreakdownRow}>
+                    <Text style={styles.scoreBreakdownText}>✓ 2° corretto: +</Text>
+                    <View style={styles.pointBadge}>
+                      <Text style={styles.pointBadgeText}>7</Text>
+                    </View>
+                    <Text style={styles.scoreBreakdownText}> pt</Text>
+                  </View>
+                )}
+                {savedPrediction.pointsEarned === 5 && (
+                  <View style={styles.scoreBreakdownRow}>
+                    <Text style={styles.scoreBreakdownText}>✓ 3° corretto: +</Text>
+                    <View style={styles.pointBadge}>
+                      <Text style={styles.pointBadgeText}>5</Text>
+                    </View>
+                    <Text style={styles.scoreBreakdownText}> pt</Text>
+                  </View>
+                )}
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -427,16 +533,16 @@ export default function HomeScreen({
         <Text style={styles.sezioneTitolo}>📊 I tuoi numeri</Text>
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumero}>1.240</Text>
+            <Text style={styles.statNumero}>{userPoints}</Text>
             <Text style={styles.statLabel}>Punti Totali</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumero}>4°</Text>
+            <Text style={styles.statNumero}>{userRank || "-"}</Text>
             <Text style={styles.statLabel}>Rank Globale</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumero}>3</Text>
-            <Text style={styles.statLabel}>Slancio</Text>
+            <Text style={styles.statNumero}>{savedPrediction?.pointsEarned || 0}</Text>
+            <Text style={styles.statLabel}>Punti previsione</Text>
           </View>
         </View>
 

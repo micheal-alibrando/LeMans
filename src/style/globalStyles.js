@@ -120,11 +120,101 @@ export const styles = StyleSheet.create({
     backgroundColor: "#ff3b30",
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
   },
   avatarText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  avatarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  scoreIcon: {
+    fontSize: 24,
+  },
+  scoreModalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "flex-start",
+  },
+  scoreModalContent: {
+    backgroundColor: "#1a1a22",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    padding: 20,
+    paddingBottom: 20,
+    marginTop: 60,
+  },
+  scoreModalClose: {
+    fontSize: 24,
+    color: "#ffffff",
+    textAlign: "right",
+    fontWeight: "700",
+  },
+  scoreModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#ffffff",
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  scoreDetailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  scoreDetailLabel: {
+    fontSize: 14,
+    color: "#b5b5b5",
+  },
+  scoreDetailValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#34c759",
+  },
+  scoreDetailBreakdown: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "#0b0b0f",
+    borderRadius: 12,
+  },
+  scoreBreakdownLabel: {
+    fontSize: 12,
+    color: "#b5b5b5",
+    marginBottom: 8,
+  },
+  scoreBreakdownText: {
+    fontSize: 12,
+    color: "#34c759",
+    marginBottom: 4,
+  },
+  scoreBreakdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  pointBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#ff3b30",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  pointBadgeText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#ffffff",
   },
   garaCard: {
     marginTop: 16,
@@ -192,6 +282,18 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
+  dashboardCard: {
+    marginTop: 16,
+    padding: 18,
+    borderRadius: 18,
+    backgroundColor: "#1a1a22",
+  },
+  dashboardTitle: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
   garaItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -254,6 +356,43 @@ export const styles = StyleSheet.create({
   navLabelActive: {
     color: "#ff3b30",
     fontWeight: "700",
+  },
+  leaderboardItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#1a1a22",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 10,
+  },
+  leaderboardTopItem: {
+    borderWidth: 1,
+    borderColor: "#ffd60a",
+  },
+  leaderboardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  leaderboardPosizione: {
+    color: "#ffd60a",
+    fontWeight: "700",
+    fontSize: 18,
+  },
+  leaderboardNome: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  leaderboardSubtext: {
+    color: "#b5b5b5",
+    fontSize: 12,
+  },
+  leaderboardScore: {
+    color: "#34c759",
+    fontWeight: "700",
+    fontSize: 16,
   },
 
   // === GARE ===

@@ -55,4 +55,12 @@ const GARE = [
   },
 ];
 
-export { PILOTI, GARE };
+const RACE_RESULTS = {
+  "24h-le-mans": {
+    primo: { id: "1", nome: "Kobayashi", numero: "7", team: "Toyota" },
+    secondo: { id: "10", nome: "Frijns", numero: "31", team: "WRT" },
+    terzo: { id: "13", nome: "Rast", numero: "28", team: "JOTA" },
+  },
+};
+
+export { PILOTI, GARE, RACE_RESULTS };
