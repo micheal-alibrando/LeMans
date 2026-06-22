@@ -18,6 +18,7 @@ export default function LeaderboardScreen({ navigation }) {
   const [userPhoto, setUserPhoto] = useState(null);
   const [userPoints, setUserPoints] = useState(0);
   const [userRank, setUserRank] = useState(null);
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
     async function loadLeaderboard() {
@@ -56,8 +57,9 @@ export default function LeaderboardScreen({ navigation }) {
 
   const renderUser = ({ item, index }) => {
     const isTop3 = index < 3;
+    const isCurrentUser = currentUser && item.id === currentUser.uid;
     return (
-      <View style={[styles.leaderboardItem, isTop3 && styles.leaderboardTopItem]}>
+      <View style={[styles.leaderboardItem, isTop3 && styles.leaderboardTopItem, isCurrentUser && styles.leaderboardCurrentUser]}>
         <View style={styles.leaderboardLeft}>
           <Text style={styles.leaderboardPosizione}>{index + 1}</Text>
           <View>
@@ -65,7 +67,10 @@ export default function LeaderboardScreen({ navigation }) {
             <Text style={styles.leaderboardSubtext}>{item.wins || 0} vittorie</Text>
           </View>
         </View>
-        <Text style={styles.leaderboardScore}>{item.points || 0} pt</Text>
+        <View style={styles.leaderboardRightContainer}>
+          <Text style={styles.leaderboardScore}>{item.points || 0} pt</Text>
+          {isCurrentUser && <Text style={styles.leaderboardStar}>⭐</Text>}
+        </View>
       </View>
     );
   };

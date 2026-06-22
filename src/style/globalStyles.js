@@ -394,6 +394,19 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
   },
+  leaderboardCurrentUser: {
+    backgroundColor: "#1f3a33",
+    borderWidth: 2,
+    borderColor: "#34c759",
+  },
+  leaderboardRightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  leaderboardStar: {
+    fontSize: 20,
+  },
 
   // === GARE ===
   headerSimple: {
