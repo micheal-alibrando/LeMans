@@ -19,6 +19,7 @@ const PILOTI = [
 const GARE = [
   {
     id: "1",
+    slug: "6h-spa",
     nome: "6h Spa",
     data: "2026-05-10T14:00:00",
     circuito: "Spa-Francorchamps",
@@ -31,6 +32,7 @@ const GARE = [
   },
   {
     id: "2",
+    slug: "24h-le-mans",
     nome: "24h Le Mans",
     data: "2026-06-13T15:00:00",
     circuito: "Circuit de la Sarthe",
@@ -43,6 +45,7 @@ const GARE = [
   },
   {
     id: "3",
+    slug: "6h-fuji",
     nome: "6h Fuji",
     data: "2026-09-20T11:00:00",
     circuito: "Fuji Speedway",
